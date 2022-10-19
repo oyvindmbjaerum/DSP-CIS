@@ -1,26 +1,3 @@
-
-fs = 16000;
-
-freq_1 = 100;
-freq_2 = 200;
-freq_3 = 500;
-freq_4 = 1500;
-freq_5 = 2000;
-freq_6 = 4000;
-freq_7 = 6000;
-
-ts = 1/fs;
-T = 2;
-t=0:ts:T;
-sine_wave =  sin(2*pi*freq_4*t);
-sine_wave =  sin(2*pi*400*t);
-sine_wave =  sin(2*pi*sine_freq*t);
-
-[simin,nbsecs,fs] = initparams(sine_wave,fs);
-
-
-sim('recplay');
-
 function [simin, nbsecs, fs] = initparams(toplay, fs)
     toplay = rescale(toplay, -1,1);
     simin = zeros(2*fs + length(toplay) + fs, 2); % Adding 2 seconds of silence at the start and one at the end
@@ -28,4 +5,3 @@ function [simin, nbsecs, fs] = initparams(toplay, fs)
     nbsecs = length(simin)/fs + 1; %Let the nbsecs be 1 second longer than input signal
     fs;           
 end
-    
