@@ -1,31 +1,41 @@
-fs = 16000;
-N = 1024;
-W = rectwin(N);
-overlap = 512;
-
-impulse_response_length = 5; % maybe we need to fix this
-impulse = wgn(impulse_response_length*2 + 1, 1, 0);
-%impulse(1) = 1; % Put the first stem to 1 because we want causality
+impulse_response_length = 31;
+causality_margin = 5;
 
 
+input_noise_start = fs*2 - causality_margin;
 
-[simin,nbsecs,fs] = initparams(impulse,fs);
-sim('recplay');
-out=simout.signals.values;
-%%
-MAX = find(out == max(out));
-
-clipped_impulse_response = out(MAX - impulse_response_length : MAX + impulse_response_length);
-
-h = clipped_impulse_response/impulse;
+input_noise = simin(input_noise_start : input_noise_start + impulse_response_length, 1);
+threshold = 0.028;
+indices_noise_starts = find(abs(diff(out)) > threshold)
 
 
-h = toeplitz(h);
+output_noise = out(indices_noise_starts(1):indices_noise_starts(1)+  impulse_response_length);
+
+
+toep_input = toeplitz(output_noise);
+
+h = input_noise' * inv(toep_input);
+
+
 save('IRest.mat','h');
-%%
-figure(2);
-subplot(2, 1, 1);
-stem(out);
-subplot(2, 1, 2);
-pwelch( out, N, overlap, N, fs);
 
+
+%%
+[freq_response, angular_freqs]  = freqz(h, 1, 32, fs);
+
+
+
+%%
+figure(4);
+subplot(2, 1, 1);
+
+stem(h);
+title("Response of estimated impulse response");
+xlabel('Samples');
+
+subplot(2, 1, 2);
+
+plot(angular_freqs,20*log10(abs(freq_response)))
+title("Frequency response of estimated impulse response");
+xlabel('Frequency (HZ)');
+ylabel('Frequency response magnitude(dB)');

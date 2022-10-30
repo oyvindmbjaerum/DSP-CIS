@@ -18,7 +18,7 @@ sine_wave =  sin(2*pi*freq_1*t)+ sin(2*pi*freq_2*t) + sin(2*pi*freq_3*t) + sin(2
 
 %[simin,nbsecs,fs] = initparams(sine_wave,fs);
 
-
+%Play noise instead of sine waves
 noise = wgn(fs*2,1,0);
 
 [simin,nbsecs,fs] = initparams(noise,fs);
