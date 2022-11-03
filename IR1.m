@@ -37,7 +37,7 @@ f = fs*(0:(L/2))/L;
 figure(3);
 subplot(2, 1, 1);
 stem(clipped_impulse_response);
-title("Response of recorded impulse signal")
+title("Time response of recorded impulse signal")
 xlabel('Samples')
 
 subplot(2, 1, 2);
