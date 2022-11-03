@@ -1,7 +1,4 @@
 
-
-function [constellation] = qam_mod(random_sequence, M)
-    constellation = qammod(random_sequence, M);
-
-
+function [constellation] = qam_mod(randomsequence, M)
+    constellation = qammod(randomsequence, M, 'InputType','bit','UnitAveragePower',true);
 end
