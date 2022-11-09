@@ -45,3 +45,7 @@ plot(f,P1db);
 title("Frequency response of impulse signal")
 xlabel("f (Hz)")
 ylabel("Frequency response magnitude (dB)")
+
+
+figure(6);
+plot(impulse_out)

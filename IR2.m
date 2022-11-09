@@ -5,16 +5,16 @@ causality_margin = 5;
 input_noise_start = fs*2 - causality_margin;
 
 input_noise = simin(input_noise_start : input_noise_start + impulse_response_length, 1);
-threshold = 0.028;
+threshold = 0.03; %Bespoke limit
 indices_noise_starts = find(abs(diff(out)) > threshold)
 
 
 output_noise = out(indices_noise_starts(1):indices_noise_starts(1)+  impulse_response_length);
 
 
-toep_input = toeplitz(output_noise);
+toep_input = toeplitz(input_noise);
 
-h = input_noise' * inv(toep_input);
+h = output_noise' * inv(toep_input);
 
 
 save('IRest.mat','h');
