@@ -1,19 +1,15 @@
-P = 16;
-N = 4;
-nfft = 16
 
+frame_length = 4096; %Errors seem to go up when frame length goes down, or maybe that its just a fixed number of errors (10 , 30)
 M = 16;
-x = (0:M-1);
+L = 16; %length of cyclic prefix
+k = log2(M);
+number_of_frames = 32;
+x = randi([0 1],number_of_frames*1024*k,1);
 
 
-binary_sequence = de2bi(x, 'left-msb');
 
-packet = reshape(binary_sequence.',1,[]);
+finished_packet = ofdm_mod(x, M, frame_length, L);
 
-frame_firsthalf = qam_mod(packet.', M);
+decoded_symbol = ofdm_demod(finished_packet, M, frame_length, L);
 
-frame_secondhalf = conj(flip(frame_firsthalf));
-
-frame = [0,frame_firsthalf.',0,frame_secondhalf.'].';
-
-%%mod_frame = ofdm_mod(frame, nfft, )
+[errors, ratio] = ber(x, reshape(decoded_symbol, [], 1))
