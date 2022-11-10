@@ -13,10 +13,3 @@ for i = 1: length(constellation_sizes)
     xlabel("SNR [dB]");
     ylabel("Bit error rate");
 end
-
-
-
-error_rate = qam_experiment(2, 0)
-
-%figure(4)
-%plot(snr_values, bit_error_rates(1,:));
