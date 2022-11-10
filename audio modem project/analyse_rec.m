@@ -6,8 +6,10 @@ fs = 16000;
 N = 1024;
 W = 512;
 overlap = 256;
-test_playrec;
 
+
+test_playrec;
+%%
 out=simout.signals.values;
 
 %sound(out, fs);
