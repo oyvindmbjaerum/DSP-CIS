@@ -23,6 +23,9 @@ response_start_index = b(1);
 
 clipped_impulse_response = impulse_out(response_start_index: response_start_index +  impulse_response_length);
 
+save('IRmeas.mat','clipped_impulse_response');
+
+
 freq_response = fft(clipped_impulse_response);
 L = length(clipped_impulse_response);
 P2 = abs(freq_response/L);
@@ -45,3 +48,7 @@ plot(f,P1db);
 title("Frequency response of impulse signal")
 xlabel("f (Hz)")
 ylabel("Frequency response magnitude (dB)")
+
+
+figure(6);
+plot(impulse_out)
