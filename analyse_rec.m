@@ -24,9 +24,11 @@ title("Spectrogram of input signal")
 figure(2);
 Hs = spectrum.periodogram('Bartlett');
 subplot(2, 1, 1);
-psd(Hs, out, 'fs', fs);
+pwelch(out, N, overlap, N, fs);
+title("PSD of recorded signal")
 subplot(2, 1, 2);
-psd(Hs, simin(:,1), 'fs', fs);
+pwelch( simin(:,1), N, overlap, N, fs);
+title("PSD of input signal")
 
 
 
