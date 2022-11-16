@@ -1,8 +1,22 @@
-frame_length = 2003;
-M = 32; %Constellation size
+frame_length = 256;
+M = 8; %Constellation size
 L = 16; %length of cyclic prefix
+fs = 16000;
+fft_size = pow2(ceil(log2(frame_length)));
+snr = 1000000000000;
+ir_estimate = load("IRmeas.mat");
 
-snr = 5000000000;
-ir_estimate = load("IRest.mat");
+[berTransmission, ratio, error_locations] = main(frame_length, M, L, snr, ir_estimate.clipped_impulse_response);
 
-[berTransmission, ratio, error_locations] = main(frame_length, M, L, snr, ir_estimate.h);
+
+figure(10)
+% freq_response = fft(ir_estimate.clipped_impulse_response, fft_size)
+% L = length(ir_estimate.clipped_impulse_response);
+% P2 = abs(freq_response/L);
+% P2 = P2';
+% P1 = P2(:,1:L/2+1);
+% P1(:,2:end-1) = 2*P1(:,2:end-1); %Change to magnitude by squaring
+% 
+% P1db = mag2db(P1);
+% f = fs*(0:(L/2))/L;
+% plot(f, P1db);

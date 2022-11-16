@@ -37,8 +37,16 @@ title("Response of estimated impulse response");
 xlabel('Samples');
 
 subplot(2, 1, 2);
+freq_response = fft(h);
+L = length(h);
+P2 = abs(freq_response/L);
+P2 = P2';
+P1 = P2(:,1:L/2+1);
+P1(:,2:end-1) = 2*P1(:,2:end-1); %Change to magnitude by squaring
 
-plot(angular_freqs,20*log10(abs(freq_response)))
+P1db = mag2db(P1);
+f = fs*(0:(L/2))/L;
+plot(f, P1db)
 title("Frequency response of estimated impulse response");
 xlabel('Frequency (HZ)');
 ylabel('Frequency response magnitude(dB)');
