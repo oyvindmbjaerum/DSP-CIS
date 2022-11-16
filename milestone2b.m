@@ -1,6 +1,6 @@
-frame_length = 256;
-M = 8; %Constellation size
-L = 16; %length of cyclic prefix
+frame_length = 1024;
+M = 2; %Constellation size
+L = 64; %length of cyclic prefix
 fs = 16000;
 fft_size = pow2(ceil(log2(frame_length)));
 snr = 1000000000000;

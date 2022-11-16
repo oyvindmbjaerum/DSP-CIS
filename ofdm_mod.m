@@ -1,7 +1,6 @@
 function[serialised_packet] = ofdm_mod(qam_stream, frame_length, L, mask)
     mask = mask(2:length(mask)/2); %Take first half of mask so we dont zero out conjugates of any the carrier, or the first zeroed carrier
-    on_carriers = find(mask(1:end) == 1);
-
+    on_carriers = find(mask == 1);
     number_of_frames = ceil(length(qam_stream)/(length(on_carriers)));
     
     %Reshape the qam_stream so you can easily insert into packet matrix
@@ -9,19 +8,19 @@ function[serialised_packet] = ofdm_mod(qam_stream, frame_length, L, mask)
     padded_qam_stream(1:length(qam_stream)) = qam_stream;
     padded_qam_stream = reshape(padded_qam_stream, length(on_carriers), number_of_frames);
 
-    packet = zeros(frame_length*number_of_frames, 1);
+    packet = zeros(length(mask)*number_of_frames, 1);
 
 
     for i = 1: number_of_frames
-        on_indices = (i-1)*frame_length + on_carriers;
+        on_indices = (i-1)*length(mask) + on_carriers;
         packet(on_indices) = padded_qam_stream( :,i);
     end
 
     %packet(1:length(qam_stream)) = qam_stream;
 
-    packet = reshape(packet, frame_length, number_of_frames); %Does not fit all package sizes
+    packet = reshape(packet, length(mask), number_of_frames); %Does not fit all package sizes
     
-    full_size_packet = zeros(frame_length*2 + 2, number_of_frames);
+    full_size_packet = zeros(frame_length, number_of_frames);
     
 
     for k = 1:number_of_frames

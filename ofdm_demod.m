@@ -1,9 +1,9 @@
 function [decoded_qam_symbols] = ofdm_demod(received_stream, frame_length, L, h, mask)
     
 if floor(log2(frame_length))==log2(frame_length)
-        fft_size = pow2(log2(frame_length)+1)*2;
+        fft_size = pow2(log2(frame_length));
     else
-        fft_size = pow2(ceil(log2(frame_length)))*2;
+        fft_size = pow2(ceil(log2(frame_length)));
     end
 
     received_stream = reshape(received_stream, fft_size + L, []);
@@ -17,12 +17,12 @@ if floor(log2(frame_length))==log2(frame_length)
     %fft_packet = fft_packet .*  channel_comp;
 
 
-    reconstructed_packet = fft_packet(1:fft_size/2,:);
-    reconstructed_packet = reconstructed_packet(1:frame_length, :);
+
+    reconstructed_packet = fft_packet(2:frame_length/2, :);
     
 
     %Get only the used carriers out
-    mask = mask(1:length(mask)/2); %Take first half of mask, because we do not care about the conjugates, and drop the first one because it is always zeroed
+    mask = mask(2:length(mask)/2); %Take first half of mask, because we do not care about the conjugates, and drop the first one because it is always zeroed
     carriers_used = find(mask == 1);
 
 
