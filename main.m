@@ -5,7 +5,7 @@ function   [berTransmission, ratio, error_locations] = main(frame_length, M, L, 
     
     mask = on_off_mask(channel_constants, frame_length);
 
-    mask = ones(length(mask), 1); %Comment out this line if you want to use ON-OFF bitloading, goes from ber 0,2 to 0,3 is that right?
+    %mask = ones(length(mask), 1); %Comment out this line if you want to use ON-OFF bitloading, goes from ber 0,2 to 0,3 is that right?
     
     % Convert BMP image to bitstream
     [bitStream, imageData, colorMap, imageSize, bitsPerPixel] = imagetobitstream('image.bmp');
@@ -19,10 +19,10 @@ function   [berTransmission, ratio, error_locations] = main(frame_length, M, L, 
     % Channel
     rxOfdmStream = awgn(ofdmStream, snr);
    
-    %rxOfdmStream =  conv(channel_constants, rxOfdmStream);
+    rxOfdmStream =  conv(channel_constants, rxOfdmStream);
     
     % OFDM demodulation
-    rxQamStream = ofdm_demod(rxOfdmStream, frame_length, L, channel_constants, mask); %(1:end - (length(channel_constants) -1),:)
+    rxQamStream = ofdm_demod(rxOfdmStream(1:end - (length(channel_constants) -1),:), frame_length, L, channel_constants, mask); %(1:end - (length(channel_constants) -1),:)
     
     % QAM demodulation
     rxBitStream = qam_demod(rxQamStream, M);

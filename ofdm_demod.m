@@ -14,7 +14,7 @@ if floor(log2(frame_length))==log2(frame_length)
     %Compensating for channel 
     channel_comp = (1./fft(h, fft_size));
     
-    %fft_packet = fft_packet .*  channel_comp;
+    fft_packet = fft_packet .*  channel_comp;
 
 
 
