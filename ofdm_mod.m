@@ -35,8 +35,8 @@ function[serialised_packet] = ofdm_mod(qam_stream, frame_length, L, mask)
 
     %Adding a cyclic prefix
     padded_packet = zeros(size(ifft_packet, 1) + L, size(ifft_packet, 2));
-    padded_packet(1:size(ifft_packet, 1),:) = ifft_packet;
-    padded_packet(size(ifft_packet, 1) + 1:end,:) = ifft_packet(1:L,:);
+    padded_packet(1:L,:) = ifft_packet(1:L,:);
+    padded_packet(L + 1:end,:) = ifft_packet;
     
     serialised_packet = reshape(padded_packet, [], 1);
 end
