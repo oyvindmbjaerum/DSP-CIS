@@ -1,10 +1,12 @@
-function [decoded_qam_symbols] = ofdm_demod(received_stream, frame_length, L, h, mask)
-    
-if floor(log2(frame_length))==log2(frame_length)
-        fft_size = pow2(log2(frame_length));
-    else
-        fft_size = pow2(ceil(log2(frame_length)));
-    end
+function [decoded_qam_symbols, channel_freq_response] = ofdm_demod(received_stream, frame_length, L, h, mask, trainblock)
+
+
+
+
+
+    %Demodulate the OFDM signal
+    fft_size = pow2(ceil(log2(frame_length)));
+
 
     received_stream = reshape(received_stream, fft_size + L, []);
     clipped_stream = received_stream(1:end - L,:); %remove cyclic prefix
@@ -31,6 +33,12 @@ if floor(log2(frame_length))==log2(frame_length)
     for i = 1 : size(reconstructed_packet, 2)
     decoded_qam_symbols(:,i) = reconstructed_packet(carriers_used,i);
     end    
-
     
+    %Calculate the frequency response of the channel
+    train_mat = repmat(trainblock, 1, size(decoded_qam_symbols,2));
+
+
+    rem_channel = train_mat - decoded_qam_symbols;
+
+
 end
