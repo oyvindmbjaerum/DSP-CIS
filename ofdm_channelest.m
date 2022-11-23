@@ -24,8 +24,8 @@ Tx = reshape(Tx_mat, [], 1);
 
 
 
-channel_constants = zeros(fft_size, 1);
-channel_constants(1) = 1;
+%channel_constants = zeros(fft_size, 1);
+%channel_constants(1) = 1;
 
 
 Rx = conv(channel_constants, Tx);
@@ -43,8 +43,6 @@ training_bits_n = reshape(training_mat, [], 1);
 [berTransmission, ratio, error_locations] = ber(training_bits_n, rx_bit_stream);
 
 
-[berTransmission1, ratio1, error_locations1] = ber(training_bits, rx_bit_stream(length(training_bits)+1:length(training_bits)*2));
-
 figure(1);
 subplot(2, 1, 1);
 
@@ -52,7 +50,7 @@ stem(channel_constants);
 title("Time response of estimated impulse response");
 xlabel('Samples');
 
-subplot(2, 1, 2);
+
 % freq_response = fft(channel_constants);
 % L = length(channel_constants);
 % P2 = abs(freq_response/L);
@@ -68,12 +66,8 @@ subplot(2, 1, 2);
 % ylabel('Frequency response magnitude(dB)');
 
 
-figure(2);
-output_frame = abs(fft((trainblock)))
-plot(output_frame)
-
 figure(3);
-stem(h_est)
+stem(h_est);
 
 figure(5);
-freqz(h_est, 1)
+freqz(h_est, 1);

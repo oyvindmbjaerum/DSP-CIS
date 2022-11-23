@@ -25,7 +25,7 @@ function[serialised_packet] = ofdm_mod(qam_stream, frame_length, L, mask)
 
     for k = 1:number_of_frames
         frame_firsthalf=  packet(:,k);
-        frame_secondhalf = conj(frame_firsthalf);
+        frame_secondhalf = flip(conj(frame_firsthalf));
         full_size_packet(:,k) = [0, frame_firsthalf.',  0, frame_secondhalf.'];
      
     end
@@ -35,8 +35,8 @@ function[serialised_packet] = ofdm_mod(qam_stream, frame_length, L, mask)
 
     %Adding a cyclic prefix
     padded_packet = zeros(size(ifft_packet, 1) + L, size(ifft_packet, 2));
-    padded_packet(1:L,:) = ifft_packet(1:L,:);
-    padded_packet(L + 1:end,:) = ifft_packet;
+    padded_packet(1:end - L,:) = ifft_packet;
+    padded_packet(end - L + 1:end,:) = ifft_packet(1:L,:);
     
     serialised_packet = reshape(padded_packet, [], 1);
 end
