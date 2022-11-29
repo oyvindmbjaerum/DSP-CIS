@@ -1,4 +1,4 @@
-function[serialised_packet] = ofdm_mod(qam_stream, frame_length, L, mask)
+function[serialised_packet, full_size_packet] = ofdm_mod(qam_stream, frame_length, L, mask)
     mask = mask(2:length(mask)/2); %Take first half of mask so we dont zero out conjugates of any the carrier, or the first zeroed carrier
     on_carriers = find(mask == 1);
     number_of_frames = ceil(length(qam_stream)/(length(on_carriers)));
@@ -35,8 +35,8 @@ function[serialised_packet] = ofdm_mod(qam_stream, frame_length, L, mask)
 
     %Adding a cyclic prefix
     padded_packet = zeros(size(ifft_packet, 1) + L, size(ifft_packet, 2));
-    padded_packet(1:end - L,:) = ifft_packet;
-    padded_packet(end - L + 1:end,:) = ifft_packet(1:L,:);
+    padded_packet(L+1:end,:) = ifft_packet;
+    padded_packet(1:L,:) = ifft_packet(end - L + 1:end,:);
     
     serialised_packet = reshape(padded_packet, [], 1);
 end

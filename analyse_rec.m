@@ -4,12 +4,30 @@ fs = 16000;
 N = 1024;
 W = rectwin(N);
 overlap = 512;
+
+impulse_response_length = 1000;
+
 test_playrec;
 
 out=simout.signals.values;
 
-%sound(out, fs);
+%%
+%align simin and out signals
 
+[out_aligned, estimated_lag] = alignIO(out, pulse, impulse_response_length);
+
+
+figure(6); 
+subplot(2, 2, 1);
+plot(simin(:,1));
+subplot(2, 2, 2);
+plot(noise);
+
+subplot(2, 2, 3);
+plot(out);
+
+subplot(2, 2, 4);
+plot(out_aligned)
 %%
 %Spectrogram calculation and plotting
 figure(1); 

@@ -1,4 +1,4 @@
-frame_length = 1024;
+frame_length = 512;
 M = 2; %Constellation size
 L = 64; %length of cyclic prefix
 fs = 16000;

@@ -1,6 +1,6 @@
-
-impulse_response_length = 1000;
-causality_margin = 10;
+fs = 16000
+impulse_response_length = 511;
+causality_margin = 100;
 
 
 input_noise_start = fs*2 - causality_margin;

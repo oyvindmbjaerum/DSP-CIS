@@ -1,7 +1,8 @@
-fft_size = 512; %same as frame length
+fs = 16000;
+fft_size = 256; %same as frame length
 n_identical_frames = 100;
 n_symbols = fft_size/2 -1;
-M = 8;
+M = 16;
 L = 32;
 
 k = log2(M);
@@ -10,44 +11,36 @@ training_bits = randi([0 1], n_symbols*k,1);
 mask = ones(fft_size, 1);
 
 
-channel = load("IRest.mat");
+channel = load("IRmeasured.mat");
 channel_constants = channel.h;
 
 trainblock = qam_mod(training_bits, M); %training block of QAM symbols
 
-Tx = ofdm_mod(trainblock, fft_size, L, mask);
-
-
+[Tx, ifft_packet] = ofdm_mod(trainblock, fft_size, L, mask);
 Tx_mat = repmat(Tx, 1, n_identical_frames);
-
 Tx = reshape(Tx_mat, [], 1);
+ifft_packet = repmat(ifft_packet, 1, n_identical_frames);
 
 
-
-%channel_constants = zeros(fft_size, 1);
-%channel_constants(1) = 1;
-
-
-Rx = conv(channel_constants, Tx);
+[simin, nbsecs, fs, pulse] = initparams(Tx,fs, length(channel_constants));
+sim('recplay');
+out=simout.signals.values;
 
 
-
-[rx_qam_stream, channel_frequency_response, h_est] = ofdm_demod(Rx(1:end - (length(channel_constants) -1),:), fft_size, L, channel_constants, mask, trainblock); % (1:end - (length(channel_constants) -1),:)
-
-
+[Rx, estimated_lag] = alignIO(out, pulse, length(channel_constants));
+[rx_qam_stream, channel_frequency_response, h_est2] = ofdm_demod(Rx, fft_size, L, channel_constants, mask, trainblock, n_identical_frames); % (1:end - (length(channel_constants) -1),:)
 rx_bit_stream = qam_demod(rx_qam_stream, M);
+
+
 
 training_mat = repmat(training_bits, 1, n_identical_frames);
 training_bits_n = reshape(training_mat, [], 1);
 
 [berTransmission, ratio, error_locations] = ber(training_bits_n, rx_bit_stream);
-
-
-figure(1);
-subplot(2, 1, 1);
-
+%%
+figure(7);
 stem(channel_constants);
-title("Time response of estimated impulse response");
+title("Time response of channel");
 xlabel('Samples');
 
 
@@ -66,8 +59,10 @@ xlabel('Samples');
 % ylabel('Frequency response magnitude(dB)');
 
 
-figure(3);
-stem(h_est);
+figure(8);
+stem(h_est2);
+title("Estimated Time response of channel");
+xlabel('Samples');
 
 figure(5);
-freqz(h_est, 1);
+freqz(h_est2, 1);
