@@ -1,37 +1,36 @@
-function [decoded_qam_symbols, channel_frequency_response, h_timedomain] = ofdm_demod(received_stream, fft_size, L, h, mask, trainblock, n_frames)
+function [decoded_qam_symbols, channel_est] = ofdm_demod(received_stream, fft_size, L, mask, trainblock, n_training_frames, n_data_frames)
     %Demodulate the OFDM signal
-    received_stream = received_stream(1: (fft_size+L)*n_frames);
     received_stream = reshape(received_stream, fft_size + L, []);
     clipped_stream = received_stream(L + 1:end,:); %remove cyclic prefix
     
     fft_packet = fft(clipped_stream, fft_size, 1);
     
-    
-    %Calculate the frequency response of the channel
+    %Empty arrays to fill our channel estimations and QAM symbols with
+    channel_est = [];
+    qam_symbols = [];
+
     padded_trainblock = [0, trainblock.', 0, flip(conj(trainblock)).'].';
-    train_mat = repmat(padded_trainblock, 1, size(fft_packet,2));
+    train_mat = repmat(padded_trainblock, 1, n_training_frames);
 
-    h_est = zeros(length(padded_trainblock), 1);
+    for k = 1 : size(fft_packet, 2)
+        
+        if  mod(k, n_training_frames + n_data_frames) == n_training_frames %Working on the last sequence of training frames
+            %Estimating the frequency response of the channel
+            h_est = zeros(fft_size, 1);
+            for i = 2 : length(padded_trainblock)/2 %Only looping through carriers holding data
+                h_est(i) = train_mat(i, :).' \ fft_packet(i, k - (n_training_frames - 1) : k).';         
+            end
+            
+            h_est(fft_size/2 + 2 : end) = conj(flip(h_est(2:fft_size/2)));
+            channel_est = [channel_est h_est];
 
-    for i = 2 : length(padded_trainblock)/2
-        h_est(i) = train_mat(i, :).' \ fft_packet(i, :).';         
+
+        elseif mod(k, n_training_frames + n_data_frames) > n_training_frames || mod(k, n_training_frames + n_data_frames) == 0  %Ddemodulating data frame
+            channel_freq_response = 1 ./ channel_est(:, end);
+            qam_symbols = [qam_symbols (fft_packet(:, k) .* channel_freq_response)];
+        end
     end
-
-
-    h_est(fft_size/2 + 2 : end) = conj(flip(h_est(2:fft_size/2)));
-    
-
-    h_fft = fft(h, fft_size, 1).';
-    h_error = abs(h_est - h_fft.');
-
-    h_timedomain = ifft((h_est), fft_size);% , "symmetric");
-    
-    %Compensating for channel
-    channel_frequency_response = 1./(h_est);
-    
-    
-    fft_packet_comped = fft_packet .*  channel_frequency_response;
     
     %Getting the data from the packet out
-    decoded_qam_symbols = fft_packet_comped(2:fft_size/2, :);
+    decoded_qam_symbols = qam_symbols(2:fft_size/2, :);
 end
