@@ -1,5 +1,4 @@
 function[serialised_packet, full_size_packet] = ofdm_mod(qam_stream, trainblock, fft_size, L, mask, n_training_frames, n_data_frames)
-    mask = mask(2:length(mask)/2); %Take first half of mask so we dont zero out conjugates of any the carrier, or the first zeroed carrier
     on_carriers = find(mask == 1);
     
     %Calculating number of frames needed for entire stream
@@ -21,7 +20,7 @@ function[serialised_packet, full_size_packet] = ofdm_mod(qam_stream, trainblock,
     end
     
     %Inserting training values only into used carriers
-    training_packet = zeros(length(mask), 1);
+    training_packet = zeros(fft_size/2 -1, 1);
     training_packet(on_carriers) = trainblock(on_carriers);
     
     %Creating matrix we will be inserting our frames into

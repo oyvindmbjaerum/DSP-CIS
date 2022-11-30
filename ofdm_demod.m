@@ -1,4 +1,12 @@
 function [decoded_qam_symbols, channel_est] = ofdm_demod(received_stream, fft_size, L, mask, trainblock, n_training_frames, n_data_frames)
+    %When running signal through acoustic channel you get a varied amount
+    %of samples, zero pad the received stream so it fits in an amount of
+    %frames
+
+    n_frames = ceil(length(received_stream)/(fft_size + L));
+
+    received_stream(n_frames*(fft_size + L)) = 0;
+
     %Demodulate the OFDM signal
     received_stream = reshape(received_stream, fft_size + L, []);
     clipped_stream = received_stream(L + 1:end,:); %remove cyclic prefix
