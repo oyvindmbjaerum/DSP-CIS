@@ -1,7 +1,9 @@
 %Do stuff needed to loop nicely through packets
-n_packets = length(Tx)/((fft_size + L)*(n_data_frames + n_training_frames)); %This will only work if number of frames are nicely divisible by frames in packet
+n_packets = ceil(length(Tx)/((fft_size + L)*(n_data_frames + n_training_frames))); %This will only work if number of frames are nicely divisible by frames in packet
 on_carriers = find(mask == 1);
 bitstream_length = n_packets * k * length(on_carriers)*n_data_frames;
+%bitstream_length = length(bitStream);
+
 rx_bit_stream = rx_bit_stream(1: bitstream_length);
 empty_image_bit_stream = zeros(bitstream_length, 1);
 
@@ -19,7 +21,7 @@ for i = 1 : n_packets
     imageRx = bitstreamtoimage(empty_image_bit_stream, imageSize, bitsPerPixel);
     figure(1);
     subplot(2, 2, 1);
-    stem(ifft(channel_est(:, i))); title('Estimated channel impulse response'); ylim([-1.1 1.1]);
+    stem(ifft(channel_est(:, i))); title('Estimated channel impulse response'); xlabel('Samples');ylim([-1.1 1.1]);
     
     %Calculating freq response
     L = length(channel_est(:, i));
@@ -32,7 +34,7 @@ for i = 1 : n_packets
     f = fs*(0:(L/2))/L;
     
     subplot(2, 2, 3);
-    plot(f, P1db); title('Estimated channel frequency response');xlabel('Frequency (Hz)'); ylabel('Frequency response magnitude(dB)'); ylim([-80 0]);
+    plot(f, P1db); title('Estimated channel frequency response');xlabel('Frequency (Hz)'); ylabel('Freq. response magnitude(dB)'); ylim([-80 0]);
     
     
     subplot(2,2,4); colormap(colorMap); image(imageRx); axis image; title('Received image'); drawnow;

@@ -1,15 +1,15 @@
-BWusage=100;
+BWusage = 100;
 
 transmit_pic;
 
 visualise_demod;
-
-
-pause(10);
-
-BWusage=50;
+fullbw_ber = ratio;
+disp("Taking a break");
+%pause(10);
+%%
+BWusage = 50;
 
 transmit_pic;
 
 visualise_demod;
-
+halfbw_ber = ratio;

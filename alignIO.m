@@ -25,7 +25,7 @@ function [out_aligned, estimated_lag] = alignIO(out, pulse, impulse_response_len
 
     %Cut off the synchronisation pulse and zeros for making sure sync pulse
     %does not bleed into signal
-    out_aligned = out_aligned( impulse_response_length + length(pulse)/2  - safety_margin : end); %Half the length of the sync pulse because it is symmetrical
+    out_aligned = out_aligned( impulse_response_length + length(pulse)  - safety_margin : end); %Half the length of the sync pulse because it is symmetrical
 
     
 end

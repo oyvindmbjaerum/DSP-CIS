@@ -1,4 +1,5 @@
 function [decoded_qam_symbols, channel_est] = ofdm_demod(received_stream, fft_size, L, mask, trainblock, n_training_frames, n_data_frames)
+    on_carriers = find(mask == 1);
     %When running signal through acoustic channel you get a varied amount
     %of samples, zero pad the received stream so it fits in an amount of
     %frames
@@ -22,7 +23,17 @@ function [decoded_qam_symbols, channel_est] = ofdm_demod(received_stream, fft_si
 
     for k = 1 : size(fft_packet, 2)
         
-        if  mod(k, n_training_frames + n_data_frames) == n_training_frames %Working on the last sequence of training frames
+        
+        if n_data_frames == 0 %Special case for when we want do demodulate only training sequences to be used to generate bit loading mask
+            %Estimating the frequency response of the channel
+            h_est = zeros(fft_size, 1);
+            for i = 2 : length(padded_trainblock)/2 %Only looping through carriers holding data
+                h_est(i) = train_mat(i, :).' \ fft_packet(i,  1 : n_training_frames).';         
+            end
+            channel_est = h_est;
+            break;
+
+        elseif  mod(k, n_training_frames + n_data_frames) == n_training_frames %Working on the last sequence of training frames
             %Estimating the frequency response of the channel
             h_est = zeros(fft_size, 1);
             for i = 2 : length(padded_trainblock)/2 %Only looping through carriers holding data
@@ -33,12 +44,16 @@ function [decoded_qam_symbols, channel_est] = ofdm_demod(received_stream, fft_si
             channel_est = [channel_est h_est];
 
 
-        elseif mod(k, n_training_frames + n_data_frames) > n_training_frames || mod(k, n_training_frames + n_data_frames) == 0  %Ddemodulating data frame
+        elseif (mod(k, n_training_frames + n_data_frames) > n_training_frames || mod(k, n_training_frames + n_data_frames) == 0)  %Ddemodulating data frame
             channel_freq_response = 1 ./ channel_est(:, end);
             qam_symbols = [qam_symbols (fft_packet(:, k) .* channel_freq_response)];
         end
     end
     
     %Getting the data from the packet out
-    decoded_qam_symbols = qam_symbols(2:fft_size/2, :);
+    if n_data_frames ~= 0
+        decoded_qam_symbols = qam_symbols(on_carriers + 1, :);
+    else
+        decoded_qam_symbols = [];
+    end
 end
