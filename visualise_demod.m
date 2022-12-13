@@ -21,11 +21,11 @@ for i = 1 : n_packets
     imageRx = bitstreamtoimage(empty_image_bit_stream, imageSize, bitsPerPixel);
     figure(1);
     subplot(2, 2, 1);
-    stem(ifft(channel_est(:, i))); title('Estimated channel impulse response'); xlabel('Samples');ylim([-1.1 1.1]);
+    stem(ifft(channel_est_data(:, i))); title('Estimated channel impulse response'); xlabel('Samples');ylim([-1.1 1.1]);
     
     %Calculating freq response
-    L = length(channel_est(:, i));
-    P2 = abs(channel_est(:, i)/L);
+    L = length(channel_est_data(:, i));
+    P2 = abs(channel_est_data(:, i)/L);
     P2 = P2';
     P1 = P2(:,1:L/2+1);
     P1(:,2:end-1) = 2*P1(:,2:end-1); %Change to magnitude by squaring

@@ -1,4 +1,4 @@
-function [decoded_qam_symbols, channel_est] = ofdm_demod(received_stream, fft_size, L, mask, trainblock, n_training_frames, n_data_frames)
+function [decoded_qam_symbols, W, Error] = ofdm_demod(received_stream, fft_size, L, mask, trainblock, n_training_frames, n_data_frames, step_size, M, best_guess)
     on_carriers = find(mask == 1);
     %When running signal through acoustic channel you get a varied amount
     %of samples, zero pad the received stream so it fits in an amount of
@@ -13,47 +13,45 @@ function [decoded_qam_symbols, channel_est] = ofdm_demod(received_stream, fft_si
     clipped_stream = received_stream(L + 1:end,:); %remove cyclic prefix
     
     fft_packet = fft(clipped_stream, fft_size, 1);
+    fft_packet = fft_packet(2 : fft_size/2, :);
+    initial_channel_guess = 0.1 + 1i*0.1;
+    delta = 0.01; %tolerance 
     
-    %Empty arrays to fill our channel estimations and QAM symbols with
-    channel_est = [];
-    qam_symbols = [];
 
-    padded_trainblock = [0, trainblock.', 0, flip(conj(trainblock)).'].';
-    train_mat = repmat(padded_trainblock, 1, n_training_frames);
+    alpha = 0.000000001;
 
-    for k = 1 : size(fft_packet, 2)
+
+
+    if n_training_frames > 0 % If you are estimating channel
+        decoded_qam_symbols = zeros(fft_size/2 - 1, n_training_frames);
+        W = zeros(fft_size/2 - 1, 1 + n_training_frames);
+        W(:, 1) = (1/conj(initial_channel_guess))  + delta;
+        Error = zeros(fft_size/2 - 1, n_training_frames);
         
-        
-        if n_data_frames == 0 %Special case for when we want do demodulate only training sequences to be used to generate bit loading mask
-            %Estimating the frequency response of the channel
-            h_est = zeros(fft_size, 1);
-            for i = 2 : length(padded_trainblock)/2 %Only looping through carriers holding data
-                h_est(i) = train_mat(i, :).' \ fft_packet(i,  1 : n_training_frames).';         
-            end
-            channel_est = h_est;
-            break;
+        for i = 1 : n_training_frames
+                Y =  fft_packet(:, i);
+                decoded_qam_symbols(:, i) = conj(W(:, i)) .* Y;
 
-        elseif  mod(k, n_training_frames + n_data_frames) == n_training_frames %Working on the last sequence of training frames
-            %Estimating the frequency response of the channel
-            h_est = zeros(fft_size, 1);
-            for i = 2 : length(padded_trainblock)/2 %Only looping through carriers holding data
-                h_est(i) = train_mat(i, :).' \ fft_packet(i, k - (n_training_frames - 1) : k).';         
-            end
-            
-            h_est(fft_size/2 + 2 : end) = conj(flip(h_est(2:fft_size/2)));
-            channel_est = [channel_est h_est];
+                Error(:, i) = (trainblock - decoded_qam_symbols(:, i)); %Compare result with training block
 
-
-        elseif (mod(k, n_training_frames + n_data_frames) > n_training_frames || mod(k, n_training_frames + n_data_frames) == 0)  %Ddemodulating data frame
-            channel_freq_response = 1 ./ channel_est(:, end);
-            qam_symbols = [qam_symbols (fft_packet(:, k) .* channel_freq_response)];
+                W(:, i + 1) = W(:, i) + (step_size ./ (alpha + conj(Y) .* Y)) .*  Y .* conj(Error(:, i));
         end
-    end
-    
-    %Getting the data from the packet out
-    if n_data_frames ~= 0
-        decoded_qam_symbols = qam_symbols(on_carriers + 1, :);
-    else
-        decoded_qam_symbols = [];
-    end
+
+    else %If you are receiving data
+        decoded_qam_symbols = zeros(fft_size/2 - 1, n_frames);
+        W = zeros(fft_size/2 - 1, 1 + n_frames);
+        W(:,  1) = best_guess;
+        Error = zeros(fft_size/2 - 1, n_frames);
+        for i = 1 : size(Tx, 2) %n_frames
+            Y =  fft_packet(:, i);
+            decoded_qam_symbols(:, i) =  conj(W(:, i)) .* Y; 
+            bits = qam_demod(decoded_qam_symbols(:, i), M); %Compare result with estimate
+            X_desired = qam_mod(bits, M);         
+            Error(:, i) = (X_desired - decoded_qam_symbols(:, i));
+
+            W(:, i + 1) = W(:, i) + (step_size ./ (alpha + conj(Y) .* Y)) .*  Y .* conj(Error(:, i));
+        end
+    end 
+
+    decoded_qam_symbols = decoded_qam_symbols(on_carriers, :);
 end

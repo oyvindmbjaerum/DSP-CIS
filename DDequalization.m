@@ -1,5 +1,5 @@
 %clf; 
-close all;
+function [] =  DDequalization()
 
 n_symbols = 100;
 M = 64;
@@ -52,4 +52,6 @@ for j = 1 : length(step_sizes)
     plot(abs(Error_vec));
     W_ideal = 1/conj(H)
     hold off
+end
+
 end

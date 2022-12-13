@@ -1,6 +1,6 @@
-function [used_carriers] = on_off_mask(channel_freq_response, fft_size, bw_usage)
+function [used_carriers] = on_off_mask(filter_freq_response, fft_size, bw_usage)
     n_used_carriers = ceil(bw_usage / 100 * (fft_size/2 - 1));
-
+    channel_freq_response = conj(1 ./ filter_freq_response);
     L = length(channel_freq_response);
     P2 = abs(channel_freq_response/L);
     P2 = P2';
@@ -9,7 +9,7 @@ function [used_carriers] = on_off_mask(channel_freq_response, fft_size, bw_usage
     
     P1db = mag2db(P1);
 
-    [sorted_carriers, indices] = sort(P2(2: fft_size/2));
+    [sorted_carriers, indices] = sort(P2);
     indices = flip(indices);
     one_indices = indices(1:n_used_carriers);
     
