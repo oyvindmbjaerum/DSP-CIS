@@ -2,18 +2,20 @@
 %Code for estimating channel and calculating mask for ON OFF bit loading
 fs = 16000;
 fft_size = 256; %same as frame length
-n_training_frames = 100;
-n_data_frames = 0;
+
 n_symbols = fft_size/2 -1;
-M = 16;
+M = 4;
 L = 16;
 impulse_response_length = 5000;
 k = log2(M);
 training_bits = randi([0 1], n_symbols*k,1);
 
 mask = ones(fft_size/2 - 1, 1);
-
 trainblock = qam_mod(training_bits, M); %training block of QAM symbols
+
+
+n_training_frames = 100;
+n_data_frames = 0;
 
 %%
 [Tx] = ofdm_mod(trainblock, trainblock, fft_size, L, mask, n_training_frames, n_data_frames);
@@ -29,24 +31,20 @@ dummy_transmission_time = toc;
 
 out=simout.signals.values;
 %%
-step_size = 1;
+step_size = 0.2;
+n_training_frames = 100;
+n_data_frames = 0;
 [Rx_training, estimated_lag] = alignIO(out, pulse, impulse_response_length);
 [rx_qam_stream_training, channel_est, Error] = ofdm_demod(Rx_training, fft_size, L, mask, trainblock, n_training_frames, n_data_frames, step_size, M, mask);
 
 
 [mask] = on_off_mask(channel_est(:, end), fft_size, BWusage);
-best_guess = channel_est(:, end);
+best_guess = channel_est(:, 70);
 %%
 %Code for transmitting image
-fs = 16000;
-fft_size = 256; %same as frame length
 n_training_frames = 0;
 n_data_frames = 5;
-n_symbols = fft_size/2 -1;
-M = 16;
-L = 16;
-impulse_response_length = 5000;
-k = log2(M);
+
 
 [bitStream, imageData, colorMap, imageSize, bitsPerPixel] = imagetobitstream('image.bmp');
 
@@ -73,7 +71,9 @@ Rx = simout.signals.values;
 
 %%
 
-step_size = 0.01;
+n_training_frames = 0;
+n_data_frames = 5;
+
 [Rx_lag_comped, estimated_lag] = alignIO(Rx, pulse, impulse_response_length);
 
 
@@ -88,3 +88,24 @@ figure(2);
 plot(Rx);
 figure(3);
 plot(Rx_lag_comped);
+
+
+%%
+
+figure(4);
+subplot(2, 1, 1);
+plot(abs(channel_est(119,:))); 
+
+subplot(2 ,1, 2);
+plot(abs(channel_est_data(119,:))); 
+
+figure(5);
+subplot(2, 1, 1);
+plot(abs(Error(119,:))); ylim([0 2]);
+
+subplot(2 ,1, 2);
+plot(abs(Error_data(119,:))); ylim([0 2]);
+
+
+figure(6);
+plot(abs(channel_est(:, end)))
