@@ -11,11 +11,6 @@ impulse_response_length = 5000;
 k = log2(M);
 training_bits = randi([0 1], n_symbols*k,1);
 
-step_size = 0.5;
-
-
-%%
-
 mask = ones(fft_size/2 - 1, 1);
 
 trainblock = qam_mod(training_bits, M); %training block of QAM symbols
@@ -34,9 +29,9 @@ dummy_transmission_time = toc;
 
 out=simout.signals.values;
 %%
-
-[Rx, estimated_lag] = alignIO(out, pulse, impulse_response_length);
-[rx_qam_stream,  channel_est, Error] = ofdm_demod(Rx, fft_size, L, mask, trainblock, n_training_frames, n_data_frames, step_size, M, mask);
+step_size = 1;
+[Rx_training, estimated_lag] = alignIO(out, pulse, impulse_response_length);
+[rx_qam_stream_training, channel_est, Error] = ofdm_demod(Rx_training, fft_size, L, mask, trainblock, n_training_frames, n_data_frames, step_size, M, mask);
 
 
 [mask] = on_off_mask(channel_est(:, end), fft_size, BWusage);
@@ -77,6 +72,8 @@ transmission_time = toc;
 Rx = simout.signals.values;
 
 %%
+
+step_size = 0.01;
 [Rx_lag_comped, estimated_lag] = alignIO(Rx, pulse, impulse_response_length);
 
 
