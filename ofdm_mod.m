@@ -1,4 +1,4 @@
-function[serialised_packet] = ofdm_mod(qam_stream, trainblock, fft_size, L, mask, n_training_frames, n_data_frames)
+function[serialised_packet, full_size_packet] = ofdm_mod(qam_stream, trainblock, fft_size, L, mask, n_training_frames, n_data_frames)
     on_carriers = find(mask == 1);
     
     %Calculating number of frames needed for entire stream

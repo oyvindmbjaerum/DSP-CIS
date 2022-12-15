@@ -1,12 +1,12 @@
 fs = 16000;
-fft_size = 128; %same as frame length
+fft_size = 256; %same as frame length
 
 n_symbols = fft_size/2 -1;
 M = 16;
 L = 32;
 
 n_training_frames = 0;
-n_data_frames = 5;
+n_data_frames = 1;
 
 
 k = log2(M);
@@ -22,11 +22,12 @@ trainblock = qam_mod(training_bits, M); %training block of QAM symbols
 qamStream = qam_mod(bitStream, M);
 
 
-%left_speaker_response = randn(fft_size,1,"like",1i);
-left_speaker_response = rand(fft_size,1);
-%right_speaker_response = randn(fft_size,1,"like",1i);
+left_speaker_response = randn(fft_size,1,"like",1i) * 0.1;
+right_speaker_response = randn(fft_size,1,"like",1i) * 0.1;
 
-right_speaker_response = rand(fft_size,1);
+%left_speaker_response = zeros(fft_size, 1);
+%left_speaker_response(1) = 1;
+%right_speaker_response = zeros(fft_size, 1);
 
 [a, b, h_comb] = fixed_transmitter_side_beamformer(left_speaker_response, right_speaker_response);
 

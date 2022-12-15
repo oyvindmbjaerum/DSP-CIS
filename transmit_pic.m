@@ -38,7 +38,7 @@ n_data_frames = 0;
 [rx_qam_stream_training, channel_est, Error] = ofdm_demod(Rx_training, fft_size, L, mask, trainblock, n_training_frames, n_data_frames, step_size, M, mask);
 
 
-[mask] = on_off_mask(channel_est(:, end), fft_size, BWusage);
+[mask] = on_off_mask(1./(conj(channel_est(:, end))), fft_size, BWusage);
 best_guess = channel_est(:, 70);
 %%
 %Code for transmitting image
