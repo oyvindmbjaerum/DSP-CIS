@@ -15,8 +15,7 @@ subplot(2,2,2); colormap(colorMap); image(imageData); axis image; title('Origina
 
 
 for i = 1 : n_packets
-    tic;
-
+    
     empty_image_bit_stream((i - 1) * bitstream_length/n_packets + 1: i * bitstream_length/n_packets) = rx_bit_stream((i - 1) * bitstream_length/n_packets + 1: i * bitstream_length/n_packets);
     imageRx = bitstreamtoimage(empty_image_bit_stream, imageSize, bitsPerPixel);
     figure(1);
@@ -38,7 +37,5 @@ for i = 1 : n_packets
     
     
     subplot(2,2,4); colormap(colorMap); image(imageRx); axis image; title('Received image'); drawnow;
-    plotting_time = toc;
 
-    pause(transmission_time/n_packets - plotting_time);
 end

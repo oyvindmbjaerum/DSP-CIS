@@ -38,6 +38,7 @@ function [decoded_qam_symbols, W, Error] = ofdm_demod(received_stream, fft_size,
         end
 
     else %If you are receiving data
+        %DD equalization
         decoded_qam_symbols = zeros(fft_size/2 - 1, n_frames);
         W = zeros(fft_size/2 - 1, 1 + n_frames);
         W(:,  1) = best_guess;

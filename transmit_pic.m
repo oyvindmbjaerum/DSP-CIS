@@ -5,7 +5,7 @@ fft_size = 256; %same as frame length
 
 n_symbols = fft_size/2 -1;
 M = 4;
-L = 16;
+L = 64;
 impulse_response_length = 5000;
 k = log2(M);
 training_bits = randi([0 1], n_symbols*k,1);
@@ -14,7 +14,7 @@ mask = ones(fft_size/2 - 1, 1);
 trainblock = qam_mod(training_bits, M); %training block of QAM symbols
 
 
-n_training_frames = 100;
+n_training_frames = 200;
 n_data_frames = 0;
 
 %%
@@ -31,7 +31,7 @@ dummy_transmission_time = toc;
 
 out=simout.signals.values;
 %%
-step_size = 0.2;
+step_size = 0.1;
 n_training_frames = 100;
 n_data_frames = 0;
 [Rx_training, estimated_lag] = alignIO(out, pulse, impulse_response_length);
@@ -39,7 +39,7 @@ n_data_frames = 0;
 
 
 [mask] = on_off_mask(1./(conj(channel_est(:, end))), fft_size, BWusage);
-best_guess = channel_est(:, 70);
+best_guess = channel_est(:, end);
 %%
 %Code for transmitting image
 n_training_frames = 0;
@@ -82,30 +82,20 @@ rx_bit_stream = qam_demod(rx_qam_stream, M);
 
 
 [berTransmission, ratio, error_locations] = ber(bitStream, rx_bit_stream(1: length(bitStream)));
-disp("done");
-%%
-figure(2);
-plot(Rx);
-figure(3);
-plot(Rx_lag_comped);
 
 
 %%
 
 figure(4);
 subplot(2, 1, 1);
-plot(abs(channel_est(119,:))); 
+plot(abs(channel_est(119,:))); title('Channel estimation in training phase');
 
 subplot(2 ,1, 2);
-plot(abs(channel_est_data(119,:))); 
+plot(abs(channel_est_data(119,:)));  title('Channel estimation in data phase');
 
 figure(5);
 subplot(2, 1, 1);
-plot(abs(Error(119,:))); ylim([0 2]);
+plot(abs(Error(119,:))); ylim([0 2]);title('Error in training phase');
 
 subplot(2 ,1, 2);
-plot(abs(Error_data(119,:))); ylim([0 2]);
-
-
-figure(6);
-plot(abs(channel_est(:, end)))
+plot(abs(Error_data(119,:))); ylim([0 2]); title('Error in data phase');
